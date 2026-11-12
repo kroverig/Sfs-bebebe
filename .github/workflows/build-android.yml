@@ -1,0 +1,31 @@
+name: Build Android APK
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    container:
+      image: barichello/godot-ci:4.3.0
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Prepare export
+        run: |
+          mkdir -p build
+          godot --headless --editor --path . --quit
+      - name: Export debug APK
+        run: godot --headless --path . --export-debug "Android" build/SFS-Bebebe.apk
+      - name: Upload APK artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: SFS-Bebebe-Android-APK
+          path: build/SFS-Bebebe.apk
+          if-no-files-found: error
+          retention-days: 14
